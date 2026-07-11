@@ -30,7 +30,9 @@ BLEService calibratorService(SERVICE_UUID);
 // Bluetooth® Low Energy Flat Panel Switch Characteristic
 BLECharacteristic calibratorCharacteristic(CHARACTERISTIC_UUID);
 
-#define VBATPIN A6
+// A7 on the Feather nRF52832 (A6 on the Feather nRF52840 Express).
+// This is wired internally on the Feather module, not on the carrier PCB.
+#define VBATPIN A7
 
 // Voltage indicator LED pins
 #define VBATLED1 9
@@ -110,8 +112,11 @@ void setup() {
   // Advertise BLE Calibrator Service
   Bluefruit.Advertising.addService(calibratorService);
   Bluefruit.Advertising.restartOnDisconnect(true);
-  Bluefruit.Advertising.setInterval(32, 244); // in unit of 0.625 ms
-  Bluefruit.Advertising.setFastTimeout(30); // number of seconds in fast mode
+  // The device is only ever powered on right before use (power switch cuts
+  // power entirely otherwise), so there is no "idle but powered" battery
+  // life concern here. Always advertise at the fast interval so the ASCOM
+  // driver's advertisement watcher reliably picks it up.
+  Bluefruit.Advertising.setInterval(32, 32); // in unit of 0.625 ms
   Bluefruit.Advertising.start(0); // 0 = Don't stop advertising after n seconds
 
   if (Serial) {

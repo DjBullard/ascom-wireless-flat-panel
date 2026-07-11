@@ -125,7 +125,25 @@ You can install the ASCOM driver by simply running the executable setup file tha
 
 ### Compiling The Driver (For Developers Only)
 
-Open Microsoft Visual Studio as an administrator (right click on the Microsoft Visual Studio shortcut, and select "Run as administrator"). This is required because when building the code, by default, Microsoft Visual Studio will register the compiled COM components, and this operation requires special privileges (Note: This is something you can disable in the project settings...) Then, open the solution (`ASCOM_Driver\WirelessFlatPanel.sln`), change the solution configuration to `Release` (in the toolbar), open the `Build` menu, and click on `Build Solution`. As long as you have properly installed all the required dependencies, the build should succeed and the ASCOM driver will be registered on your system. The binary file generated will be `ASCOM_Driver\bin\Release\ASCOM.DarkSkyGeek.WirelessFlatPanel.dll`. You may also download this file from the [Releases page](https://github.com/jlecomte/ascom-wireless-flat-panel/releases).
+#### Prerequisites
+
+* [Microsoft Visual Studio](https://visualstudio.microsoft.com/) (the free Community edition works fine). When installing, make sure the **".NET desktop development"** workload is checked — without it, the project types used here won't load.
+* [ASCOM Platform](https://ascom-standards.org/) — the runtime that hosts the driver.
+* [ASCOM Platform Developer Components](https://ascom-standards.org/COMDeveloper/Index.htm) — required to build against the `ASCOM.DeviceInterface` / `ASCOM.Utilities` assemblies referenced by the project.
+
+#### Build Steps
+
+1. **Run Visual Studio as an administrator.** Right-click the Visual Studio shortcut and select "Run as administrator" *before* opening the solution. This is required because the project is configured to register the compiled COM component on build (`Register for COM Interop`), and COM registration needs elevated privileges. If you skip this, the build itself may still succeed, but the driver won't be registered, and the ASCOM Chooser won't see it. (You can disable COM-registration-on-build in the project properties if you'd rather register manually, but that's not necessary for typical use.)
+2. **Open the solution**: `File > Open > Project/Solution`, then select `ASCOM_Driver\WirelessFlatPanel.sln`.
+3. **Switch the build configuration to `Release`** using the configuration dropdown in the toolbar (it defaults to `Debug`).
+4. **Build**: `Build` menu > `Build Solution` (or `Ctrl+Shift+B`).
+5. If the build succeeds, the driver is automatically registered with ASCOM on that machine — there's no separate install/registration step to run. The compiled DLL is written to `ASCOM_Driver\bin\Release\ASCOM.DarkSkyGeek.WirelessFlatPanel.dll`.
+
+#### Troubleshooting
+
+* **Build fails referencing `ASCOM.DeviceInterface` or `ASCOM.Utilities`**: the ASCOM Platform Developer Components likely aren't installed, or were installed after Visual Studio and haven't been picked up — try restarting Visual Studio.
+* **Build succeeds, but the device doesn't show up in the ASCOM Chooser**: you likely forgot to run Visual Studio as administrator. Close Visual Studio, reopen it as administrator, and rebuild (a clean rebuild — `Build > Rebuild Solution` — ensures the COM registration step actually re-runs).
+* **You want the DLL without building it yourself**: prebuilt versions are attached to the [Releases page](https://github.com/jlecomte/ascom-wireless-flat-panel/releases).
 
 ## Arduino Firmware
 

@@ -29,7 +29,7 @@ namespace ASCOM.DarkSkyGeek
     //
 
     /// <summary>
-    /// DarkSkyGeek’s ASCOM WirelessFlatPanel Driver.
+    /// DarkSkyGeekï¿½s ASCOM WirelessFlatPanel Driver.
     /// </summary>
     [Guid("b97088ae-7680-4b44-95cb-f08e4b8972e9")]
     [ClassInterface(ClassInterfaceType.None)]
@@ -44,7 +44,7 @@ namespace ASCOM.DarkSkyGeek
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        private static string deviceName = "DarkSkyGeek’s Wireless Flat Panel";
+        private static string deviceName = "DarkSkyGeekï¿½s Wireless Flat Panel";
 
         // Constants used for Profile persistence
         private const string traceStateProfileName = "Trace Level";
@@ -244,18 +244,22 @@ namespace ASCOM.DarkSkyGeek
                         throw new ASCOM.DriverException("You have not yet paired a device");
                     }
 
+                    // Clean up any stale connection left behind by an unclean
+                    // disconnect (e.g., the device lost power without us being
+                    // told), so we always start from a known-empty state.
+                    DisposeBleObjects();
+
                     LogMessage("Connected Set", "Connecting...");
                     Task t = ConnectToDevice();
-                    t.Wait(15000); // Wait up to 15 seconds...
+                    t.Wait(30000); // Wait up to 30 seconds...
                     if (bleDevice != null && bleCharacteristic != null)
                     {
                         connectedState = true;
+                        bleDevice.ConnectionStatusChanged += BleDevice_ConnectionStatusChanged;
                     }
                     else
                     {
-                        bleCharacteristic = null;
-                        bleDevice?.Dispose();
-                        bleDevice = null;
+                        DisposeBleObjects();
                         throw new ASCOM.DriverException("Failed to connect");
                     }
                 }
@@ -265,13 +269,7 @@ namespace ASCOM.DarkSkyGeek
 
                     LogMessage("Connected Set", "Disconnecting...");
 
-                    bleCharacteristic?.Service?.Session?.Dispose();
-                    bleCharacteristic?.Service?.Dispose();
-
-                    bleCharacteristic = null;
-
-                    bleDevice?.Dispose();
-                    bleDevice = null;
+                    DisposeBleObjects();
                 }
             }
         }
@@ -614,7 +612,66 @@ namespace ASCOM.DarkSkyGeek
 
             watcher.Start();
 
+            // BluetoothLEAdvertisementWatcher can silently stop picking up
+            // advertisements over a long-running scan session, particularly
+            // once the device switches from its fast to its slow advertising
+            // interval. Periodically restarting it works around this.
+            Task.Run(async () =>
+            {
+                while (!tcs.Task.IsCompleted)
+                {
+                    await Task.Delay(5000);
+                    if (tcs.Task.IsCompleted)
+                        break;
+                    if (watcher.Status == BluetoothLEAdvertisementWatcherStatus.Started)
+                    {
+                        watcher.Stop();
+                        watcher.Start();
+                    }
+                }
+            });
+
             return tcs.Task;
+        }
+
+        /// <summary>
+        /// Invoked by Windows when the underlying BLE connection's status
+        /// changes. Used to detect an unclean disconnect (e.g., the device
+        /// lost power) so that <see cref="IsConnected"/> reflects reality
+        /// instead of staying stuck on the last value we set explicitly.
+        /// </summary>
+        private void BleDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        {
+            if (sender.ConnectionStatus == BluetoothConnectionStatus.Disconnected)
+            {
+                tl.LogMessage("BleDevice_ConnectionStatusChanged", "Connection lost");
+                connectedState = false;
+                DisposeBleObjects();
+            }
+        }
+
+        /// <summary>
+        /// Unsubscribes from and releases the BLE device/characteristic
+        /// references, if any. Safe to call multiple times, or when there is
+        /// nothing to clean up.
+        /// </summary>
+        private void DisposeBleObjects()
+        {
+            try
+            {
+                if (bleDevice != null)
+                {
+                    bleDevice.ConnectionStatusChanged -= BleDevice_ConnectionStatusChanged;
+                }
+                bleCharacteristic?.Service?.Session?.Dispose();
+                bleCharacteristic?.Service?.Dispose();
+            }
+            finally
+            {
+                bleCharacteristic = null;
+                bleDevice?.Dispose();
+                bleDevice = null;
+            }
         }
 
         /// <summary>
