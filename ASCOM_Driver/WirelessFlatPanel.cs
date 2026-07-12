@@ -1,4 +1,4 @@
-/*
+﻿/*
  * WirelessFlatPanel.cs
  * Copyright (C) 2023 - Present, Julien Lecomte - All Rights Reserved
  * Licensed under the MIT License. See the accompanying LICENSE file for terms.
@@ -29,7 +29,7 @@ namespace ASCOM.DarkSkyGeek
     //
 
     /// <summary>
-    /// DarkSkyGeek's ASCOM WirelessFlatPanel Driver.
+    /// DarkSkyGeek’s ASCOM WirelessFlatPanel Driver.
     /// </summary>
     [Guid("b97088ae-7680-4b44-95cb-f08e4b8972e9")]
     [ClassInterface(ClassInterfaceType.None)]
