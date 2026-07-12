@@ -154,9 +154,15 @@ namespace ASCOM.DarkSkyGeek
 
                                 if (existing != null)
                                 {
-                                    // Already listed: just refresh its signal strength.
+                                    // Already listed: refresh its signal strength. A non-owner-drawn
+                                    // ListBox caches each row's display string when the item is added,
+                                    // so mutating the item + Invalidate() would just repaint the stale
+                                    // text. Reassigning the item forces the ListBox to re-query
+                                    // ToString(); the framework preserves the current selection across
+                                    // the reassignment.
                                     existing.Rssi = rssi;
-                                    devicesListBox.Invalidate();
+                                    int index = devicesListBox.Items.IndexOf(existing);
+                                    devicesListBox.Items[index] = existing;
                                     AppendLog($"Updated signal strength for {formattedAddress}: {rssi} dBm");
                                 }
                                 else

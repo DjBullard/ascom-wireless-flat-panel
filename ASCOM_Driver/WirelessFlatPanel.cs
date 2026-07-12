@@ -612,10 +612,13 @@ namespace ASCOM.DarkSkyGeek
 
             watcher.Start();
 
-            // BluetoothLEAdvertisementWatcher can silently stop picking up
-            // advertisements over a long-running scan session, particularly
-            // once the device switches from its fast to its slow advertising
-            // interval. Periodically restarting it works around this.
+            // BluetoothLEAdvertisementWatcher can silently stop surfacing
+            // advertisements over a long-running scan session. This is
+            // belt-and-suspenders on the driver side: our current firmware
+            // always advertises at the fast interval, but older firmware
+            // drops to a slow interval after 30s, which makes the watcher
+            // especially prone to going quiet. Periodically restarting it
+            // keeps discovery reliable against both.
             Task.Run(async () =>
             {
                 while (!tcs.Task.IsCompleted)
