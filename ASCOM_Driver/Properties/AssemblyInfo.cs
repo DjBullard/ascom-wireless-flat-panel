@@ -8,10 +8,10 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("ASCOM.DarkSkyGeek.WirelessFlatPanel")]
-[assembly: AssemblyDescription("DarkSkyGeek's Wireless Flat Panel")]
+[assembly: AssemblyDescription("DarkSkyGeek’s Wireless Flat Panel")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DarkSkyGeek's Wireless Flat Panel")]
+[assembly: AssemblyProduct("DarkSkyGeek’s Wireless Flat Panel")]
 [assembly: AssemblyCopyright("Copyright © 2023 - Present, Julien Lecomte - All Rights Reserved")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
