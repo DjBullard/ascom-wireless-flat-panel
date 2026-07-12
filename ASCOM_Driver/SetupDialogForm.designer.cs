@@ -1,4 +1,4 @@
-namespace ASCOM.DarkSkyGeek
+ï»¿namespace ASCOM.DarkSkyGeek
 {
     partial class SetupDialogForm
     {
@@ -31,6 +31,7 @@ namespace ASCOM.DarkSkyGeek
             this.cmdOK = new System.Windows.Forms.Button();
             this.cmdCancel = new System.Windows.Forms.Button();
             this.chkTrace = new System.Windows.Forms.CheckBox();
+            this.linkTraceHelp = new System.Windows.Forms.LinkLabel();
             this.DSGLogo = new System.Windows.Forms.PictureBox();
             this.descriptionLabel = new System.Windows.Forms.Label();
             this.pairedDeviceAddrLbl = new System.Windows.Forms.Label();
@@ -38,6 +39,8 @@ namespace ASCOM.DarkSkyGeek
             this.compatDevicesLbl = new System.Windows.Forms.Label();
             this.deviceSelectionBtn = new System.Windows.Forms.Button();
             this.devicesListBox = new System.Windows.Forms.ListBox();
+            this.chkShowLog = new System.Windows.Forms.CheckBox();
+            this.logTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.DSGLogo)).BeginInit();
             this.SuspendLayout();
             // 
@@ -71,11 +74,23 @@ namespace ASCOM.DarkSkyGeek
             this.chkTrace.AutoSize = true;
             this.chkTrace.Location = new System.Drawing.Point(12, 346);
             this.chkTrace.Name = "chkTrace";
-            this.chkTrace.Size = new System.Drawing.Size(69, 17);
+            this.chkTrace.Size = new System.Drawing.Size(97, 17);
             this.chkTrace.TabIndex = 6;
-            this.chkTrace.Text = "Trace on";
+            this.chkTrace.Text = "Trace logging";
             this.chkTrace.UseVisualStyleBackColor = true;
-            // 
+            //
+            // linkTraceHelp
+            //
+            this.linkTraceHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.linkTraceHelp.AutoSize = true;
+            this.linkTraceHelp.Location = new System.Drawing.Point(115, 346);
+            this.linkTraceHelp.Name = "linkTraceHelp";
+            this.linkTraceHelp.Size = new System.Drawing.Size(70, 13);
+            this.linkTraceHelp.TabIndex = 16;
+            this.linkTraceHelp.TabStop = true;
+            this.linkTraceHelp.Text = "What's this?";
+            this.linkTraceHelp.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkTraceHelp_LinkClicked);
+            //
             // DSGLogo
             // 
             this.DSGLogo.Image = global::ASCOM.DarkSkyGeek.Properties.Resources.darkskygeek;
@@ -96,7 +111,7 @@ namespace ASCOM.DarkSkyGeek
             this.descriptionLabel.Name = "descriptionLabel";
             this.descriptionLabel.Size = new System.Drawing.Size(258, 88);
             this.descriptionLabel.TabIndex = 8;
-            this.descriptionLabel.Text = "This driver wirelessly sends commands to the flat panel, which is a Bluetooth© Lo" +
+            this.descriptionLabel.Text = "This driver wirelessly sends commands to the flat panel, which is a BluetoothÂ® Lo" +
     "w Energy (BLE) device. Please, ensure that your device is powered up before atte" +
     "mpting to connect to it.";
             // 
@@ -130,7 +145,36 @@ namespace ASCOM.DarkSkyGeek
             this.compatDevicesLbl.Size = new System.Drawing.Size(233, 13);
             this.compatDevicesLbl.TabIndex = 12;
             this.compatDevicesLbl.Text = "Bluetooth address of nearby wireless flat panels:";
-            // 
+            //
+            // chkShowLog
+            //
+            this.chkShowLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkShowLog.AutoSize = true;
+            this.chkShowLog.Location = new System.Drawing.Point(245, 150);
+            this.chkShowLog.Name = "chkShowLog";
+            this.chkShowLog.Size = new System.Drawing.Size(98, 17);
+            this.chkShowLog.TabIndex = 13;
+            this.chkShowLog.Text = "Show live log";
+            this.chkShowLog.UseVisualStyleBackColor = true;
+            this.chkShowLog.CheckedChanged += new System.EventHandler(this.chkShowLog_CheckedChanged);
+            //
+            // logTextBox
+            //
+            this.logTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.logTextBox.BackColor = System.Drawing.Color.Black;
+            this.logTextBox.ForeColor = System.Drawing.Color.Lime;
+            this.logTextBox.Font = new System.Drawing.Font("Consolas", 8F);
+            this.logTextBox.Location = new System.Drawing.Point(15, 313);
+            this.logTextBox.Multiline = true;
+            this.logTextBox.Name = "logTextBox";
+            this.logTextBox.ReadOnly = true;
+            this.logTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.logTextBox.Size = new System.Drawing.Size(350, 142);
+            this.logTextBox.TabIndex = 17;
+            this.logTextBox.TabStop = false;
+            this.logTextBox.Visible = false;
+            //
             // deviceSelectionBtn
             // 
             this.deviceSelectionBtn.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -161,6 +205,8 @@ namespace ASCOM.DarkSkyGeek
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(375, 371);
+            this.Controls.Add(this.logTextBox);
+            this.Controls.Add(this.chkShowLog);
             this.Controls.Add(this.devicesListBox);
             this.Controls.Add(this.deviceSelectionBtn);
             this.Controls.Add(this.compatDevicesLbl);
@@ -169,6 +215,7 @@ namespace ASCOM.DarkSkyGeek
             this.Controls.Add(this.descriptionLabel);
             this.Controls.Add(this.DSGLogo);
             this.Controls.Add(this.chkTrace);
+            this.Controls.Add(this.linkTraceHelp);
             this.Controls.Add(this.cmdCancel);
             this.Controls.Add(this.cmdOK);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -177,7 +224,7 @@ namespace ASCOM.DarkSkyGeek
             this.Name = "SetupDialogForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DarkSkyGeek’s Wireless Flat Panel";
+            this.Text = "DarkSkyGeekâ€™s Wireless Flat Panel";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SetupDialogForm_FormClosed);
             this.Load += new System.EventHandler(this.SetupDialogForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.DSGLogo)).EndInit();
@@ -191,6 +238,7 @@ namespace ASCOM.DarkSkyGeek
         private System.Windows.Forms.Button cmdOK;
         private System.Windows.Forms.Button cmdCancel;
         private System.Windows.Forms.CheckBox chkTrace;
+        private System.Windows.Forms.LinkLabel linkTraceHelp;
         private System.Windows.Forms.PictureBox DSGLogo;
         private System.Windows.Forms.Label descriptionLabel;
         private System.Windows.Forms.Label pairedDeviceAddrLbl;
@@ -198,5 +246,7 @@ namespace ASCOM.DarkSkyGeek
         private System.Windows.Forms.Label compatDevicesLbl;
         private System.Windows.Forms.Button deviceSelectionBtn;
         private System.Windows.Forms.ListBox devicesListBox;
+        private System.Windows.Forms.CheckBox chkShowLog;
+        private System.Windows.Forms.TextBox logTextBox;
     }
 }

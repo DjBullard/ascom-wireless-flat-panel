@@ -1,5 +1,8 @@
 /*
  * Arduino_Firmware.ino
+ * For the Adafruit Feather nRF52840 Express and the Adafruit Feather nRF52832.
+ * The correct board is selected automatically from the Arduino IDE's Board
+ * menu (see VBATPIN below), so no per-board editing is required.
  * Copyright (C) 2023 - Present, Julien Lecomte - All Rights Reserved
  * Licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
@@ -30,16 +33,38 @@ BLEService calibratorService(SERVICE_UUID);
 // Bluetooth® Low Energy Flat Panel Switch Characteristic
 BLECharacteristic calibratorCharacteristic(CHARACTERISTIC_UUID);
 
-#define VBATPIN A6
-
-// Voltage indicator LED pins
-#define VBATLED1 9
-#define VBATLED2 10
-#define VBATLED3 11
-#define VBATLED4 12
-
-// Pin controlling the intensity of the flat pane
-#define LED_CONTROL_PIN 13
+// ----------------------------------------------------------------------------
+// Board-specific pin map. The two supported Feathers number their Arduino pins
+// completely differently, so EVERY pin below changes per board -- not just the
+// battery-sense pin. The board macro is set by the Adafruit nRF52 core from the
+// Arduino IDE's Board menu, so the right set is selected automatically.
+//
+// nRF52832 caveat: its battery-sense pin (A7 = P0.31) is the *same* GPIO as the
+// carrier PCB's D09 indicator-LED pad. A populated LED there clamps the ADC and
+// ruins the battery reading. This build fixes it with a hardware bodge: the D09
+// LED is lifted off P0.31 and rewired to the otherwise-unused D05 header pad
+// (= P0.27 on the '832), so A7 reads the battery cleanly AND all four indicator
+// LEDs still work (VBATLED1 also drives the red connect/disconnect status LED).
+// On the nRF52840 the battery pin (A6) is a separate GPIO with no LED on it, so
+// no rewiring is needed there.
+// ----------------------------------------------------------------------------
+#if defined(ARDUINO_NRF52832_FEATHER)
+  #define VBATPIN         A7   // P0.31 (internal battery divider)
+  #define VBATLED1        27   // D05 pad -> P0.27  (bodged off D09; see note above)
+  #define VBATLED2        11   // D10 pad -> P0.11
+  #define VBATLED3        7    // D11 pad -> P0.07
+  #define VBATLED4        15   // D12 pad -> P0.15
+  #define LED_CONTROL_PIN 16   // D13 pad -> P0.16 (MOSFET gate)
+#elif defined(ARDUINO_NRF52840_FEATHER)
+  #define VBATPIN         A6
+  #define VBATLED1        9
+  #define VBATLED2        10
+  #define VBATLED3        11
+  #define VBATLED4        12
+  #define LED_CONTROL_PIN 13
+#else
+  #error "Unsupported board: select an Adafruit Feather nRF52832 or nRF52840 Express."
+#endif
 
 const uint16_t MIN_BRIGHTNESS = 0;
 const uint16_t MAX_BRIGHTNESS = 1023;
@@ -110,8 +135,11 @@ void setup() {
   // Advertise BLE Calibrator Service
   Bluefruit.Advertising.addService(calibratorService);
   Bluefruit.Advertising.restartOnDisconnect(true);
-  Bluefruit.Advertising.setInterval(32, 244); // in unit of 0.625 ms
-  Bluefruit.Advertising.setFastTimeout(30); // number of seconds in fast mode
+  // The device is only ever powered on right before use (power switch cuts
+  // power entirely otherwise), so there is no "idle but powered" battery
+  // life concern here. Always advertise at the fast interval so the ASCOM
+  // driver's advertisement watcher reliably picks it up.
+  Bluefruit.Advertising.setInterval(32, 32); // in unit of 0.625 ms
   Bluefruit.Advertising.start(0); // 0 = Don't stop advertising after n seconds
 
   if (Serial) {

@@ -21,6 +21,11 @@ namespace ASCOM.DarkSkyGeek
 
     public partial class SetupDialogForm : Form
     {
+        // How much taller the dialog gets when the live log is toggled on,
+        // to reveal the (otherwise hidden) logTextBox without disturbing the
+        // rest of the layout, which is all anchored to the bottom edge.
+        private const int LOG_PANEL_HEIGHT_DELTA = 128;
+
         WirelessFlatPanel wirelessFlatPanel;
         BluetoothLEAdvertisementWatcher watcher;
         ulong bleDeviceAddress;
@@ -29,6 +34,33 @@ namespace ASCOM.DarkSkyGeek
         {
             InitializeComponent();
             this.wirelessFlatPanel = wirelessFlatPanel;
+            this.Text = $"{this.Text} (v{wirelessFlatPanel.DriverVersion})";
+        }
+
+        private void AppendLog(string message)
+        {
+            logTextBox.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}");
+        }
+
+        private void chkShowLog_CheckedChanged(object sender, EventArgs e)
+        {
+            logTextBox.Visible = chkShowLog.Checked;
+            this.Height += chkShowLog.Checked ? LOG_PANEL_HEIGHT_DELTA : -LOG_PANEL_HEIGHT_DELTA;
+        }
+
+        private void linkTraceHelp_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            MessageBox.Show(
+                "Trace logging records detailed diagnostic information about this driver's " +
+                "activity (connecting, disconnecting, sending brightness commands, etc.) to a " +
+                "log file.\n\n" +
+                "It's off by default since it isn't needed for day-to-day use. Turn it on if " +
+                "you're troubleshooting a connection problem, or if asked to provide logs when " +
+                "reporting an issue. Look under your ASCOM Logs folder (see the ASCOM " +
+                "Diagnostics tool if you're not sure where that is) for the resulting file.",
+                "About Trace Logging",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
 
         private string getFormattedBluetoothAddress(ulong address)
@@ -93,6 +125,7 @@ namespace ASCOM.DarkSkyGeek
                 chkTrace.Enabled = false;
                 devicesListBox.Enabled = false;
                 deviceSelectionBtn.Enabled = false;
+                AppendLog("Already connected; device scanning is disabled.");
             }
             else
             {
@@ -100,6 +133,8 @@ namespace ASCOM.DarkSkyGeek
                 {
                     ScanningMode = BluetoothLEScanningMode.Active
                 };
+
+                AppendLog("Scanning for nearby wireless flat panels...");
 
                 watcher.Received += (w, args) =>
                 {
@@ -109,21 +144,38 @@ namespace ASCOM.DarkSkyGeek
                         if (uuid.Equals(WirelessFlatPanel.BLE_SERVICE_UUID))
                         {
                             ulong address = args.BluetoothAddress;
+                            short rssi = args.RawSignalStrengthInDBm;
+                            string formattedAddress = getFormattedBluetoothAddress(address);
 
                             devicesListBox.Invoke(new Action(() =>
                             {
                                 // Was this device previously added to the list? Let's find out...
-                                bool found = devicesListBox.Items.Cast<ListBoxItem>().Any(x => x.BluetoothAddress == address);
+                                ListBoxItem existing = devicesListBox.Items.Cast<ListBoxItem>().FirstOrDefault(x => x.BluetoothAddress == address);
 
-                                // If not, add it to the list so it can be selected:
-                                if (!found)
+                                if (existing != null)
                                 {
+                                    // Already listed: refresh its signal strength. A non-owner-drawn
+                                    // ListBox caches each row's display string when the item is added,
+                                    // so mutating the item + Invalidate() would just repaint the stale
+                                    // text. Reassigning the item forces the ListBox to re-query
+                                    // ToString(); the framework preserves the current selection across
+                                    // the reassignment.
+                                    existing.Rssi = rssi;
+                                    int index = devicesListBox.Items.IndexOf(existing);
+                                    devicesListBox.Items[index] = existing;
+                                    AppendLog($"Updated signal strength for {formattedAddress}: {rssi} dBm");
+                                }
+                                else
+                                {
+                                    // Not listed yet: add it so it can be selected.
                                     ListBoxItem item = new ListBoxItem
                                     {
-                                        Text = getFormattedBluetoothAddress(address),
-                                        BluetoothAddress = address
+                                        Address = formattedAddress,
+                                        BluetoothAddress = address,
+                                        Rssi = rssi
                                     };
                                     devicesListBox.Items.Add(item);
+                                    AppendLog($"Found device {formattedAddress} (signal: {rssi} dBm)");
                                 }
                             }));
                         }
@@ -150,20 +202,22 @@ namespace ASCOM.DarkSkyGeek
         private void deviceSelectionBtn_Click(object sender, EventArgs e)
         {
             ListBoxItem item = devicesListBox.SelectedItem as ListBoxItem;
-            pairedDeviceAddrValue.Text = item.Text;
+            pairedDeviceAddrValue.Text = item.Address;
             bleDeviceAddress = item.BluetoothAddress;
             pairedDeviceAddrValue.ForeColor = System.Drawing.Color.Green;
+            AppendLog($"Selected device {item.Address}");
         }
     }
 
     class ListBoxItem
     {
-        public string Text { get; set; }
+        public string Address { get; set; }
         public ulong BluetoothAddress { get; set; }
+        public short Rssi { get; set; }
 
         public override string ToString()
         {
-            return Text;
+            return $"{Address}  (signal: {Rssi} dBm)";
         }
     }
 }

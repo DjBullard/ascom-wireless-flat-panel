@@ -125,18 +125,39 @@ You can install the ASCOM driver by simply running the executable setup file tha
 
 ### Compiling The Driver (For Developers Only)
 
-Open Microsoft Visual Studio as an administrator (right click on the Microsoft Visual Studio shortcut, and select "Run as administrator"). This is required because when building the code, by default, Microsoft Visual Studio will register the compiled COM components, and this operation requires special privileges (Note: This is something you can disable in the project settings...) Then, open the solution (`ASCOM_Driver\WirelessFlatPanel.sln`), change the solution configuration to `Release` (in the toolbar), open the `Build` menu, and click on `Build Solution`. As long as you have properly installed all the required dependencies, the build should succeed and the ASCOM driver will be registered on your system. The binary file generated will be `ASCOM_Driver\bin\Release\ASCOM.DarkSkyGeek.WirelessFlatPanel.dll`. You may also download this file from the [Releases page](https://github.com/jlecomte/ascom-wireless-flat-panel/releases).
+#### Prerequisites
+
+* [Microsoft Visual Studio](https://visualstudio.microsoft.com/) (the free Community edition works fine). When installing, make sure the **".NET desktop development"** workload is checked — without it, the project types used here won't load.
+* [ASCOM Platform](https://ascom-standards.org/) — installs the `ASCOM.*` assemblies (`ASCOM.DeviceInterfaces`, `ASCOM.Utilities`, etc.) into the Global Assembly Cache, which is where the project's ASCOM references resolve from. You do **not** need the separate "ASCOM Platform Developer Components" download (and definitely not the ".NET Cross-Platform Library" — that's for the newer Alpaca-style drivers, unrelated to this COM-based project) — the main Platform install is sufficient.
+* A **Windows 10 or 11 SDK**, for the WinRT metadata (`Windows.Devices.Bluetooth`, etc.) that the driver's BLE code depends on. The ".NET desktop development" workload does *not* pull this in by itself. In the Visual Studio Installer, go to the **"Individual components"** tab, search for "Windows 10 SDK" (or "Windows 11 SDK"), and check any recent version. If you don't have a Windows SDK at all, `C:\Program Files (x86)\Windows Kits\10\UnionMetadata` won't exist yet — that's the tell.
+
+#### Build Steps
+
+1. **Run Visual Studio as an administrator.** Right-click the Visual Studio shortcut and select "Run as administrator" *before* opening the solution. This is required because the project is configured to register the compiled COM component on build (`Register for COM Interop`), and COM registration needs elevated privileges. If you skip this, the build itself may still succeed, but the driver won't be registered, and the ASCOM Chooser won't see it. (You can disable COM-registration-on-build in the project properties if you'd rather register manually, but that's not necessary for typical use.)
+2. **Open the solution**: `File > Open > Project/Solution`, then select `ASCOM_Driver\WirelessFlatPanel.sln`.
+3. **Switch the build configuration to `Release`** using the configuration dropdown in the toolbar (it defaults to `Debug`).
+4. **Build**: `Build` menu > `Build Solution` (or `Ctrl+Shift+B`).
+5. If the build succeeds, the driver is automatically registered with ASCOM on that machine — there's no separate install/registration step to run. The compiled DLL is written to `ASCOM_Driver\bin\Release\ASCOM.DarkSkyGeek.WirelessFlatPanel.dll`.
+
+#### Troubleshooting
+
+* **Build fails referencing `ASCOM.DeviceInterfaces` or `ASCOM.Utilities`**: the ASCOM Platform itself likely isn't installed (or was installed after Visual Studio and hasn't been picked up — try restarting Visual Studio).
+* **Build fails with errors like `The type or namespace name 'Devices' does not exist in the namespace 'Windows'` or `The referenced component 'Windows' could not be found`**: you're missing the Windows SDK's metadata component — see the Windows 10/11 SDK prerequisite above.
+* **Build succeeds, but the device doesn't show up in the ASCOM Chooser**: you likely forgot to run Visual Studio as administrator. Close Visual Studio, reopen it as administrator, and do a clean rebuild (`Build > Rebuild Solution`, not just `Build Solution`) — this ensures the COM registration step actually re-runs.
+* **You want the DLL without building it yourself**: prebuilt versions are attached to the [Releases page](https://github.com/jlecomte/ascom-wireless-flat-panel/releases).
 
 ## Arduino Firmware
 
 ### Microcontroller Compatibility
 
-The firmware was written specifically for, and tested with, an Adafruit Feather nRF52840 Express. It will likely not work on all Arduino-compatible boards. Please, do not file an issue if you encounter a problem with a different type of microcontroller board.
+The firmware was originally written specifically for, and tested with, an Adafruit Feather nRF52840 Express. It has also been ported to and tested on the Adafruit Feather nRF52832. It will likely not work on other Arduino-compatible boards. Please, do not file an issue if you encounter a problem with a different type of microcontroller board.
+
+There is a single sketch, `Arduino_Firmware/Arduino_Firmware.ino`, that supports both boards. The only functional difference between them is the `VBATPIN` constant, which is wired internally on the Feather module itself (not the carrier PCB) and differs between the two boards (`A6` on the nRF52840 Express, `A7` on the nRF52832). The sketch selects the correct pin automatically based on the board you pick in the Arduino IDE's Board menu, so no hand-editing is required.
 
 ### Compiling And Uploading The Firmware
 
 * Please, follow the [Arduino IDE setup steps](https://learn.adafruit.com/introducing-the-adafruit-nrf52840-feather/arduino-bsp-setup) published by Adafruit.
-* Then, connect your Adafruit Feather nRF52840 Express board to your computer using a micro USB cable, open the sketch file located at `Arduino_Firmware\Arduino_Firmware.ino`, and click on the `Upload` button in the toolbar.
+* Then, connect your Feather board to your computer using a micro USB cable, open `Arduino_Firmware/Arduino_Firmware.ino`, select your board in the Board menu, and click on the `Upload` button in the toolbar.
 
 ## Electronic Circuit
 
