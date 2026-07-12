@@ -224,7 +224,7 @@ namespace ASCOM.DarkSkyGeek
             this.Name = "SetupDialogForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DarkSkyGeek�s Wireless Flat Panel";
+            this.Text = "DarkSkyGeek's Wireless Flat Panel";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SetupDialogForm_FormClosed);
             this.Load += new System.EventHandler(this.SetupDialogForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.DSGLogo)).EndInit();
