@@ -152,15 +152,12 @@ You can install the ASCOM driver by simply running the executable setup file tha
 
 The firmware was originally written specifically for, and tested with, an Adafruit Feather nRF52840 Express. It has also been ported to and tested on the Adafruit Feather nRF52832. It will likely not work on other Arduino-compatible boards. Please, do not file an issue if you encounter a problem with a different type of microcontroller board.
 
-There are two sketch variants, one per supported board — the only functional difference between them is the `VBATPIN` constant, which is wired internally on the Feather module itself (not the carrier PCB) and differs between the two boards:
-
-* `Arduino_Firmware/Arduino_Firmware_nRF52840/Arduino_Firmware_nRF52840.ino` — for the Feather nRF52840 Express.
-* `Arduino_Firmware/Arduino_Firmware_nRF52832/Arduino_Firmware_nRF52832.ino` — for the Feather nRF52832.
+There is a single sketch, `Arduino_Firmware/Arduino_Firmware.ino`, that supports both boards. The only functional difference between them is the `VBATPIN` constant, which is wired internally on the Feather module itself (not the carrier PCB) and differs between the two boards (`A6` on the nRF52840 Express, `A7` on the nRF52832). The sketch selects the correct pin automatically based on the board you pick in the Arduino IDE's Board menu, so no hand-editing is required.
 
 ### Compiling And Uploading The Firmware
 
 * Please, follow the [Arduino IDE setup steps](https://learn.adafruit.com/introducing-the-adafruit-nrf52840-feather/arduino-bsp-setup) published by Adafruit.
-* Then, connect your Feather board to your computer using a micro USB cable, open the sketch folder matching your board (see above), and click on the `Upload` button in the toolbar.
+* Then, connect your Feather board to your computer using a micro USB cable, open `Arduino_Firmware/Arduino_Firmware.ino`, select your board in the Board menu, and click on the `Upload` button in the toolbar.
 
 ## Electronic Circuit
 

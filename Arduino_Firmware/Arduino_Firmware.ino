@@ -1,6 +1,8 @@
 /*
- * Arduino_Firmware_nRF52840.ino
- * For the Adafruit Feather nRF52840 Express.
+ * Arduino_Firmware.ino
+ * For the Adafruit Feather nRF52840 Express and the Adafruit Feather nRF52832.
+ * The correct board is selected automatically from the Arduino IDE's Board
+ * menu (see VBATPIN below), so no per-board editing is required.
  * Copyright (C) 2023 - Present, Julien Lecomte - All Rights Reserved
  * Licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
@@ -31,9 +33,17 @@ BLEService calibratorService(SERVICE_UUID);
 // Bluetooth® Low Energy Flat Panel Switch Characteristic
 BLECharacteristic calibratorCharacteristic(CHARACTERISTIC_UUID);
 
-// A6 on the Feather nRF52840 Express (A7 on the Feather nRF52832).
-// This is wired internally on the Feather module, not on the carrier PCB.
+// Battery voltage sense pin. This is wired internally on the Feather module,
+// not on the carrier PCB, and differs between the two supported boards:
+// A6 on the Feather nRF52840 Express, A7 on the Feather nRF52832. The board
+// macro is set by the Adafruit nRF52 core based on the Board menu selection.
+#if defined(ARDUINO_NRF52832_FEATHER)
+#define VBATPIN A7
+#elif defined(ARDUINO_NRF52840_FEATHER)
 #define VBATPIN A6
+#else
+#error "Unsupported board: select an Adafruit Feather nRF52832 or nRF52840 Express."
+#endif
 
 // Voltage indicator LED pins
 #define VBATLED1 9

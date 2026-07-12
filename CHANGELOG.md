@@ -5,7 +5,7 @@
 ### Firmware
 
 * Added support for the Adafruit Feather nRF52832 as an alternative to the nRF52840 Express. The only firmware change actually required is `VBATPIN`, which moves from `A6` (nRF52840) to `A7` (nRF52832) — this pin is wired internally on the Feather module itself, not on the carrier PCB, so it's the one thing that has to change per-board. Everything else (LED control pin, indicator LEDs) sits on standard Feather header positions that are identical between the two boards.
-* Split the firmware into two sketch variants, one per supported board (`Arduino_Firmware_nRF52840/` and `Arduino_Firmware_nRF52832/`), differing only in `VBATPIN`, so each can be opened and flashed directly without hand-editing a constant first.
+* Kept the firmware as a single sketch (`Arduino_Firmware/Arduino_Firmware.ino`) that supports both boards, selecting `VBATPIN` automatically from the Arduino IDE's Board menu (via the Adafruit core's `ARDUINO_NRF52832_FEATHER` / `ARDUINO_NRF52840_FEATHER` board macros) — no per-board editing required, and no duplicated firmware to keep in sync.
 * The device now always advertises over BLE at the fast interval, instead of dropping to a slower interval after 30 seconds. Since this device is only ever powered on right before use (a hardware power switch cuts power entirely otherwise), there's no "idle but powered" battery concern to optimize for, and the faster interval makes the ASCOM driver's device discovery noticeably more reliable.
 
 ### ASCOM Driver
