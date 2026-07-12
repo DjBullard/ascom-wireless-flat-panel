@@ -111,7 +111,7 @@
             this.descriptionLabel.Name = "descriptionLabel";
             this.descriptionLabel.Size = new System.Drawing.Size(258, 88);
             this.descriptionLabel.TabIndex = 8;
-            this.descriptionLabel.Text = "This driver wirelessly sends commands to the flat panel, which is a Bluetooth� Lo" +
+            this.descriptionLabel.Text = "This driver wirelessly sends commands to the flat panel, which is a Bluetooth® Lo" +
     "w Energy (BLE) device. Please, ensure that your device is powered up before atte" +
     "mpting to connect to it.";
             // 
