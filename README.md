@@ -128,8 +128,8 @@ You can install the ASCOM driver by simply running the executable setup file tha
 #### Prerequisites
 
 * [Microsoft Visual Studio](https://visualstudio.microsoft.com/) (the free Community edition works fine). When installing, make sure the **".NET desktop development"** workload is checked — without it, the project types used here won't load.
-* [ASCOM Platform](https://ascom-standards.org/) — the runtime that hosts the driver.
-* [ASCOM Platform Developer Components](https://ascom-standards.org/COMDeveloper/Index.htm) — required to build against the `ASCOM.DeviceInterface` / `ASCOM.Utilities` assemblies referenced by the project.
+* [ASCOM Platform](https://ascom-standards.org/) — installs the `ASCOM.*` assemblies (`ASCOM.DeviceInterfaces`, `ASCOM.Utilities`, etc.) into the Global Assembly Cache, which is where the project's ASCOM references resolve from. You do **not** need the separate "ASCOM Platform Developer Components" download (and definitely not the ".NET Cross-Platform Library" — that's for the newer Alpaca-style drivers, unrelated to this COM-based project) — the main Platform install is sufficient.
+* A **Windows 10 or 11 SDK**, for the WinRT metadata (`Windows.Devices.Bluetooth`, etc.) that the driver's BLE code depends on. The ".NET desktop development" workload does *not* pull this in by itself. In the Visual Studio Installer, go to the **"Individual components"** tab, search for "Windows 10 SDK" (or "Windows 11 SDK"), and check any recent version. If you don't have a Windows SDK at all, `C:\Program Files (x86)\Windows Kits\10\UnionMetadata` won't exist yet — that's the tell.
 
 #### Build Steps
 
@@ -141,8 +141,9 @@ You can install the ASCOM driver by simply running the executable setup file tha
 
 #### Troubleshooting
 
-* **Build fails referencing `ASCOM.DeviceInterface` or `ASCOM.Utilities`**: the ASCOM Platform Developer Components likely aren't installed, or were installed after Visual Studio and haven't been picked up — try restarting Visual Studio.
-* **Build succeeds, but the device doesn't show up in the ASCOM Chooser**: you likely forgot to run Visual Studio as administrator. Close Visual Studio, reopen it as administrator, and rebuild (a clean rebuild — `Build > Rebuild Solution` — ensures the COM registration step actually re-runs).
+* **Build fails referencing `ASCOM.DeviceInterfaces` or `ASCOM.Utilities`**: the ASCOM Platform itself likely isn't installed (or was installed after Visual Studio and hasn't been picked up — try restarting Visual Studio).
+* **Build fails with errors like `The type or namespace name 'Devices' does not exist in the namespace 'Windows'` or `The referenced component 'Windows' could not be found`**: you're missing the Windows SDK's metadata component — see the Windows 10/11 SDK prerequisite above.
+* **Build succeeds, but the device doesn't show up in the ASCOM Chooser**: you likely forgot to run Visual Studio as administrator. Close Visual Studio, reopen it as administrator, and do a clean rebuild (`Build > Rebuild Solution`, not just `Build Solution`) — this ensures the COM registration step actually re-runs.
 * **You want the DLL without building it yourself**: prebuilt versions are attached to the [Releases page](https://github.com/jlecomte/ascom-wireless-flat-panel/releases).
 
 ## Arduino Firmware
