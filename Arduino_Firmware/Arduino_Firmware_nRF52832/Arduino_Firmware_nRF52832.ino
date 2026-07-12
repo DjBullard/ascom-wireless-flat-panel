@@ -1,5 +1,6 @@
 /*
- * Arduino_Firmware.ino
+ * Arduino_Firmware_nRF52832.ino
+ * For the Adafruit Feather nRF52832.
  * Copyright (C) 2023 - Present, Julien Lecomte - All Rights Reserved
  * Licensed under the MIT License. See the accompanying LICENSE file for terms.
  */
