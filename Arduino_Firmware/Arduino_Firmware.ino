@@ -55,6 +55,9 @@ BLECharacteristic calibratorCharacteristic(CHARACTERISTIC_UUID);
   #define VBATLED3        7    // D11 pad -> P0.07
   #define VBATLED4        15   // D12 pad -> P0.15
   #define LED_CONTROL_PIN 16   // D13 pad -> P0.16 (MOSFET gate)
+  // Max BLE TX power for this SoC. The nRF52832 radio tops out at +4 dBm.
+  // Bluefruit snaps the argument to the nearest supported level.
+  #define BLE_TX_POWER    4
 #elif defined(ARDUINO_NRF52840_FEATHER)
   #define VBATPIN         A6
   #define VBATLED1        9
@@ -62,6 +65,8 @@ BLECharacteristic calibratorCharacteristic(CHARACTERISTIC_UUID);
   #define VBATLED3        11
   #define VBATLED4        12
   #define LED_CONTROL_PIN 13
+  // The nRF52840 radio supports up to +8 dBm.
+  #define BLE_TX_POWER    8
 #else
   #error "Unsupported board: select an Adafruit Feather nRF52832 or nRF52840 Express."
 #endif
@@ -107,6 +112,12 @@ void setup() {
   setBrightness(MIN_BRIGHTNESS);
 
   Bluefruit.begin();
+
+  // Crank the radio to its maximum output power for the best range. This is a
+  // battery-vs-range tradeoff, but the panel only runs while actively in use
+  // (hard power switch), so idle drain is a non-issue here. Must be set after
+  // Bluefruit.begin(); it applies to both advertising and connection.
+  Bluefruit.setTxPower(BLE_TX_POWER);
 
   Bluefruit.setName("DarkSkyGeek Calibrator");
 
