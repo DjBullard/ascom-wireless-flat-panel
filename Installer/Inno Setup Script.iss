@@ -1,6 +1,6 @@
 #define MyAppPublisher "Dark Sky Geek"
 #define MyAppName "Wireless Flat Panel ASCOM Driver"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.1.1"
 #define MyAppURL "https://github.com/jlecomte/ascom-wireless-flat-panel"
 
 [Setup]
