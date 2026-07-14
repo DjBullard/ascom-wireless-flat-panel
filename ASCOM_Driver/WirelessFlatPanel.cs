@@ -56,6 +56,13 @@ namespace ASCOM.DarkSkyGeek
         // Variables to hold the current device configuration
         internal ulong bleDeviceAddress = bleDeviceAddressDefault;
 
+        // Desired trace-logging state. This mirrors tl.Enabled while the driver
+        // is alive, but is kept as a plain field so it survives Dispose() (which
+        // nulls tl). NINA disposes the driver instance while the modal setup
+        // dialog is still open, so the dialog's OK handler and WriteProfile must
+        // persist the trace state without dereferencing the (possibly-null) tl.
+        internal bool traceState = Convert.ToBoolean(traceStateDefault);
+
         // Constants shared with the Arduino firmware...
         // Some of these are static because they are used in the setup dialog...
         public static Guid BLE_SERVICE_UUID = new Guid("0d389e0f-25dc-4070-9135-400b81e543ce");
@@ -214,9 +221,15 @@ namespace ASCOM.DarkSkyGeek
         public void Dispose()
         {
             Connected = false;
-            tl.Enabled = false;
-            tl.Dispose();
-            tl = null;
+            // Guard against a double Dispose(): NINA can dispose the driver more
+            // than once (e.g. once while the Setup dialog is open, again at
+            // shutdown), and tl is null after the first call.
+            if (tl != null)
+            {
+                tl.Enabled = false;
+                tl.Dispose();
+                tl = null;
+            }
         }
 
         /// <summary>
@@ -752,7 +765,11 @@ namespace ASCOM.DarkSkyGeek
             using (Profile driverProfile = new Profile())
             {
                 driverProfile.DeviceType = "CoverCalibrator";
-                tl.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
+                traceState = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
+                if (tl != null)
+                {
+                    tl.Enabled = traceState;
+                }
                 bleDeviceAddress = ulong.Parse(driverProfile.GetValue(driverID, bleDeviceAddressProfileName, string.Empty, bleDeviceAddressDefault.ToString()));
             }
         }
@@ -765,7 +782,7 @@ namespace ASCOM.DarkSkyGeek
             using (Profile driverProfile = new Profile())
             {
                 driverProfile.DeviceType = "CoverCalibrator";
-                driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
+                driverProfile.WriteValue(driverID, traceStateProfileName, traceState.ToString());
                 driverProfile.WriteValue(driverID, bleDeviceAddressProfileName, bleDeviceAddress.ToString());
             }
         }

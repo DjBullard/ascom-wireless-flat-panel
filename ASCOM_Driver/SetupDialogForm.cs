@@ -75,7 +75,16 @@ namespace ASCOM.DarkSkyGeek
 
         private void cmdOK_Click(object sender, EventArgs e)
         {
-            wirelessFlatPanel.tl.Enabled = chkTrace.Checked;
+            // Persist the user's choices onto plain fields. Do NOT dereference
+            // wirelessFlatPanel.tl here: NINA disposes the driver instance while
+            // this modal dialog is still open, which nulls tl. The trace state is
+            // carried by the traceState field so WriteProfile can persist it
+            // whether or not tl is still alive.
+            wirelessFlatPanel.traceState = chkTrace.Checked;
+            if (wirelessFlatPanel.tl != null)
+            {
+                wirelessFlatPanel.tl.Enabled = chkTrace.Checked;
+            }
             wirelessFlatPanel.bleDeviceAddress = bleDeviceAddress;
         }
 
@@ -103,7 +112,7 @@ namespace ASCOM.DarkSkyGeek
 
         private void SetupDialogForm_Load(object sender, EventArgs e)
         {
-            chkTrace.Checked = wirelessFlatPanel.tl.Enabled;
+            chkTrace.Checked = wirelessFlatPanel.traceState;
             bleDeviceAddress = wirelessFlatPanel.bleDeviceAddress;
 
             // Adjust the position of the label so it looks decent...
