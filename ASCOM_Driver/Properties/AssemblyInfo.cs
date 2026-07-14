@@ -34,5 +34,13 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 //
+// VERSIONING: when bumping the driver version, increment it EVERYWHERE — these
+// values are not derived from a single source, so a partial bump ships mismatched
+// numbers. The full set of places to update:
+//   - AssemblyVersion / AssemblyFileVersion below (this file)
+//   - Installer/Inno Setup Script.iss  (#define MyAppVersion)
+//   - CHANGELOG.md  (section heading)
+// Note: DriverVersion (WirelessFlatPanel.cs) reports only Major.Minor by ASCOM
+// convention, so the patch digit intentionally does not surface there.
 [assembly: AssemblyVersion("1.1.1.0")]
 [assembly: AssemblyFileVersion("1.1.1.0")]
